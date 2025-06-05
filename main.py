@@ -1,39 +1,34 @@
-import os
+from stats import get_word_count, get_alphabet_count, get_sorted_list_of_dicts
+import sys
 
-def number_of_words(file_contents):
-    words = file_contents.split()
-    return words
+def get_book_text(filepath):
+    with open(filepath) as f:
+        file_contents = f.read()
+    return file_contents
 
-def number_of_letters(file_content):
-    dict_of_letters = {}
-    for character in file_content:
-        if (character.lower() in dict_of_letters) and (ord(character.lower()) >= 97 and ord(character.lower()) <= 122):
-            dict_of_letters[character.lower()] = dict_of_letters[character.lower()] + 1
-        elif character.isalpha():
-            dict_of_letters[character.lower()] = 1
-    return dict_of_letters
+def print_report(filepath, words_count, sorted_alphabet_list):
+    print(f"============ BOOKBOT ============")
+    print(f"Analyzing book found at {filepath}...")
+    print("----------- Word Count ----------")
+    print(f"Found {words_count} total words")
+    print("--------- Character Count -------")
+    for alphabet_dict in sorted_alphabet_list:
+        if alphabet_dict["char"].isalpha():
+            print(f"{alphabet_dict['char']}: {alphabet_dict['num']}")
 
-path_to_file = "books/frankenstein.txt"
-file_content = ""
-os.makedirs(os.path.dirname(path_to_file), exist_ok=True)
-with open(path_to_file) as f:
-    file_content = f.read()
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python3 main.py <path_to_book>")
+        sys.exit(1)
+    file_location = sys.argv[1]
+    file_contents = get_book_text(file_location)
+    # print(file_contents)
+    words_count = get_word_count(file_contents)
+    # print(f"{words_count} words found in the document")
+    alphabet_count_dict = get_alphabet_count(file_contents)
+    # print(alphabet_count_dict)
+    sorted_alphabet_list = get_sorted_list_of_dicts(alphabet_count_dict)
 
-words = number_of_words(file_content)
-print(len(words))
-
-dict_of_letters = number_of_letters(file_content)
-print(dict_of_letters)
-
-sorted_dict_of_letters = sorted(dict_of_letters.items(), key=lambda x:x[1], reverse=True)
-
-book_name = path_to_file.split("/")[-1]
-path_to_report = f"reports/{book_name}-report.txt"
-os.makedirs(os.path.dirname(path_to_report), exist_ok=True)
-with open(path_to_report, 'w') as w:
-    w.write(f"--- Begin report of {path_to_file} ---\n")
-    w.write(f"Total non-whitespaced words in doc are: {len(words)} \n\n")
-    for letter in sorted_dict_of_letters:
-        w.write(f"The '{letter[0]}' character was found {letter[1]} times\n")
-    w.write(f"\n\n")
-    w.write(f"-----  End of the report ----")
+    print_report(file_location, words_count, sorted_alphabet_list)
+if __name__ == "__main__":
+    main()
